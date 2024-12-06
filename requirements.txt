@@ -1,0 +1,9 @@
+torch
+torchtext
+spacy
+konlpy  
+streamlit
+nltk
+googletrans
+sentencepiece
+transformers
