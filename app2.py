@@ -1,26 +1,18 @@
 import streamlit as st
-from transformers import (
-    MarianMTModel,
-    MarianTokenizer,
-    T5ForConditionalGeneration,
-    T5Tokenizer,
-)
+from transformers import pipeline, T5ForConditionalGeneration, T5Tokenizer
 
 
-# Load Translation Model
-def load_translation_model(src_lang, tgt_lang):
-    model_name = f"Helsinki-NLP/opus-mt-{src_lang}-{tgt_lang}"
-    tokenizer = MarianTokenizer.from_pretrained(model_name)
-    model = MarianMTModel.from_pretrained(model_name)
-    return tokenizer, model
+# Load Translation Pipeline for Korean to English
+def load_translation_pipeline():
+    pipe = pipeline("translation", model="Helsinki-NLP/opus-mt-tc-big-en-ko")
+    return pipe
 
 
 # Translate Text
-def translate_text(text, src_lang, tgt_lang):
-    tokenizer, model = load_translation_model(src_lang, tgt_lang)
-    tokenized_text = tokenizer(text, return_tensors="pt", truncation=True)
-    translated_tokens = model.generate(**tokenized_text)
-    return tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
+def translate_text(text):
+    pipe = load_translation_pipeline()
+    translation = pipe(text)
+    return translation[0]['translation_text']
 
 
 # Load Summarization Model
@@ -52,24 +44,23 @@ def summarize_text(text):
 # Streamlit App
 st.title("Machine Translation and Summarization App")
 st.write(
-    "This app provides free text translation and summarization using open-source models."
+    "This app provides free text translation (Korean to English) and summarization using open-source models."
 )
 
-# Input Section
-st.header("Translation")
-text_to_translate = st.text_area("Enter text to translate:")
-src_lang = st.text_input("Source Language Code (e.g., 'en'):", value="en")
-tgt_lang = st.text_input("Target Language Code (e.g., 'fr'):", value="fr")
+# Input Section for Translation
+st.header("Korean to English Translation")
+text_to_translate = st.text_area("Enter text in Korean to translate to English:")
 
 if st.button("Translate"):
     if text_to_translate:
-        translation = translate_text(text_to_translate, src_lang, tgt_lang)
+        translation = translate_text(text_to_translate)
         st.subheader("Translated Text:")
         st.write(translation)
     else:
         st.warning("Please enter text to translate.")
 
-st.header("Summarization")
+# Input Section for Summarization
+st.header("Text Summarization")
 text_to_summarize = st.text_area("Enter text to summarize:")
 
 if st.button("Summarize"):
