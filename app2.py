@@ -2,15 +2,16 @@ import streamlit as st
 from transformers import pipeline, T5ForConditionalGeneration, T5Tokenizer
 
 
-# Load Translation Pipeline for Korean to English
-def load_translation_pipeline():
-    pipe = pipeline("translation", model="Helsinki-NLP/opus-mt-tc-big-en-ko")
+# Load Translation Pipelines for English-Korean and Korean-English
+def load_translation_pipeline(src_lang, tgt_lang):
+    model_name = f"Helsinki-NLP/opus-mt-tc-big-{src_lang}-{tgt_lang}"
+    pipe = pipeline("translation", model=model_name)
     return pipe
 
 
 # Translate Text
-def translate_text(text):
-    pipe = load_translation_pipeline()
+def translate_text(text, src_lang, tgt_lang):
+    pipe = load_translation_pipeline(src_lang, tgt_lang)
     translation = pipe(text)
     return translation[0]['translation_text']
 
@@ -44,22 +45,27 @@ def summarize_text(text):
 # Streamlit App
 st.title("Machine Translation and Summarization App")
 st.write(
-    "This app provides free text translation (Korean to English) and summarization using open-source models."
+    "This app provides free text translation (Korean to English and vice-versa) and summarization using open-source models."
 )
 
-# Input Section for Translation
-st.header("Korean to English Translation")
-text_to_translate = st.text_area("Enter text in Korean to translate to English:")
+# Translation Section
+st.header("Translation")
+text_to_translate = st.text_area("Enter text to translate:")
+src_lang = st.selectbox("Source Language", ["en", "ko"], help="Select the source language.")
+tgt_lang = st.selectbox("Target Language", ["ko", "en"], help="Select the target language.")
 
 if st.button("Translate"):
     if text_to_translate:
-        translation = translate_text(text_to_translate)
-        st.subheader("Translated Text:")
-        st.write(translation)
+        if src_lang != tgt_lang:
+            translation = translate_text(text_to_translate, src_lang, tgt_lang)
+            st.subheader("Translated Text:")
+            st.write(translation)
+        else:
+            st.warning("Please choose different source and target languages.")
     else:
         st.warning("Please enter text to translate.")
 
-# Input Section for Summarization
+# Summarization Section
 st.header("Text Summarization")
 text_to_summarize = st.text_area("Enter text to summarize:")
 
