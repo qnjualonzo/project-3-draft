@@ -1,10 +1,10 @@
 torch
-transformers
+transformers==4.46.3
 torchtext
 spacy
 konlpy  
 streamlit
 nltk
-googletrans
+googletrans==4.0.0-rc1
 sentencepiece
 transformers
